@@ -1,0 +1,180 @@
+== liste pour la demo
+
+=== voxxed 2017
+==== Init
+
+* creation du projet avec leiningen
+----
+lein new luminus voxxed-2017-clojure +reagent
+----
+
+* Modifs middlewares
+.test-voxxed.handler
+----
+; supprimer (wrap-routes middleware/wrap-csrf)
+----
+
+* Démarrage de l'appli
+----
+lein run
+lein figwheel
+----
+
+==== backend
+
+* Ajout du state
+.test-voxxed.route.home
+----
+(defonce state
+         (atom {}))
+----
+
+* Route qui renvoie tous les todos
+.test-voxxed.route.home
+[source,clojure]
+----
+; import
+[ring.util.http-response :refer [content-type ok]]
+
+; function
+(defn all []
+  (content-type
+    (ok @state)
+    "application/json; charset=utf8")))
+
+; route
+(GET "/all" []
+            (all))
+----
+
+* Route qui rajoute un TODO
+[source,clojure]
+----
+; function
+(defn add-todo [{:keys [params]}]
+  (println params)
+  (content-type (ok
+                  (swap! state assoc (params :title) (params :desc)))
+                  "application/json; charset=utf8"))
+
+; route
+(POST "/todo" request
+  (add-todo request))
+----
+
+===== tests avec curl
+
+.Create TODO in JSON
+----
+curl 0:3000/todo --data '{"title": "courses2", "desc": "tomates salades"}' -H "Content-Type: application/json"
+----
+
+.Create TODO with classic POST
+----
+curl 0:3000/todo --data "title=Aller%20chez%20le%20coiffeur&desc=4%20rue%20des%20dames"
+----
+
+.Lister les todos
+----
+curl 0:3000/todo
+----
+
+==== frontend
+
+
+* Ajouter css
+.screen.css
+----
+.content {
+    margin-left:auto;
+    margin-right:auto;
+    background-color: white;
+    width: 520px;
+    padding: 30px;
+}
+
+.error {
+    width: 520px;
+    padding: 30px;
+    margin-bottom: 50px;
+    position: relative;
+    background-color: white;
+}
+---
+
+* Tout commenter et garder un mount component minimal
+----
+(defn mount-components []
+  (r/render [#'home] (.getElementById js/document "app")))
+----
+
+
+* creer formulaire + envoi au back
+----
+(defn todo-form [todos]
+  (let [fields (r/atom {})]
+    (fn []
+      [:div.content
+       [:div.form-group
+        [:h3 "TODO form"]
+        [:p "title:"
+         [:input.form-control
+          {:type      :text
+           :name      :title
+           :on-change #(swap! fields assoc :title (-> % .-target .-value))
+           :value     (:title @fields)}]]
+        [:p "Description:"
+         [:textarea.form-control
+          {:rows      4
+           :cols      50
+           :name      :desc
+           :value     (:desc @fields)
+           :on-change #(swap! fields assoc :desc (-> % .-target .-value))}]]
+        [:input.btn.btn-primary {:type     :submit :value "Add todo"
+                                 :on-click #(add-todo! fields todos)}]]])))
+
+(defn add-todo! [fields todos]
+  (POST "/todo"
+        {:params        @fields
+         :handler       #(swap! todos conj {:title (:title @fields), :desc (:desc @fields)})
+         :error-handler #(.error js/console (str "error:" %))}))
+
+(defn home []
+  (let [todos (r/atom nil)]
+    (fn []
+      [:div.row
+       [:div.span12
+        [todo-form todos]]
+       ])))
+----
+
+* visualiser les todos
+
+----
+
+(defn get-todos [todos]
+  (GET "/todo"
+       {:handler #(reset! todos %)
+        :response-format :transit}))
+
+(defn todo-list [todos]
+  [:div.content
+   [:h3 "TODO list"]
+   (.log js/console @todos)
+   [:ul.list-group
+    (for [{:keys [title desc]} @todos]
+      ^{:key title}
+      [:li.list-group-item
+       [:div.text-primary title]
+       [:div desc]])]])
+
+(defn home []
+  (let [todos (r/atom nil)]
+    (get-todos todos)
+    (fn []
+      [:div.row
+       [:div.span12
+        [todo-form todos]]
+       [:div.span12
+        [todo-list todos]]])))
+----

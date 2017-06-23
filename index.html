@@ -1,0 +1,685 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Voxxed Days Luxembourg 2017 : À la découverte de Clojure</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		<link rel="stylesheet" href="css/font-awesome.min.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-state="intro" data-transition="none">
+					<h1>À la découverte de<br>
+					<div class="fourth">Clojure</div></h1>
+					<p style="margin-top:30%"><span class="alternate2">Florian Boulay</span>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Sommaire
+						* Partie 1 : Théorie
+						 * Historique
+						 * Fondamentaux
+						 * Structure de données
+						 * Macros
+						* Partie 2 : Pratique
+						 * Live coding
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Moi
+						Developpeur et architecte chez Oyst
+
+						<i class="fa fa-twitter" aria-hidden="true"></i> [@FlorianBoulay](http://twitter.com/FlorianBoulay)
+
+						Ancien développeur pub en ligne (RTB, ad serving)
+
+						Technos chez Oyst : Kafka, Go, AWS, ES, Postgres, Redis, node.js
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Historique
+						* Créé par Rich Hickey en 2007
+						* Dernière version 1.8 en janvier 2016
+						* 1.9 arrive dans les mois qui viennent
+					</script>
+				</section>
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Philosophie <small>1/2</small>
+						* Immutabilité, fonction de premier ordre
+						* Designé pour la concurrence
+						* Fonctionnel (Famille des lisp, excellent langage !)
+						* Le polymorphisme est bien, l'orienté objet est surfait
+					</script>
+				</section>
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Philosophie <small>2/2</small>
+						Clojure est :
+						* Simple
+						* Concis : mais pas illisible
+						* Flexible : création d'abstractions, couplage faible
+						* Langage orienté données
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Syntaxe <small>- 1/3</small>
+						```clj
+						(capitalize "voxxed lux")
+						;; "Voxxed lux"
+						```
+						Après ouverture de la parenthèse, il y a toujours une fonction <small> (ou forme spéciale ou macro)</small>
+
+						Pas d'opérateurs, uniquement des fonctions. Ici `+` et `*` sont des fonction
+						```clj
+						(+ 42 (* 31 1e4))
+						```
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Syntaxe <small>- 2/3</small>
+
+						Comparaison avec Java
+						```java
+						// java
+						capitalize("voxxed lux")
+						```
+						```clj
+						;; clojure
+						(capitalize "Voxxed lux")
+						```
+						La parenthèse ouvrante est utilisée pour ouvrir un nouveau bloc.
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Syntaxe <small>- 3/3</small>
+
+						La syntaxe Lisp se lit de l'appel le plus interne
+						```clj
+						;; appels imbriqués
+						(> 1 (* 2 (- 2 (+ 123 5)))
+						;; true
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						;; threading macro
+						(-> 5
+						  (+ 123)
+						  (- 2)
+						  (* 2)
+						  (> 1))
+						;; true
+						```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Ecrire une fonction
+
+						Une fonction prend en <span class="alternate1"><b>entrée des valeurs</b></span> et renvoie en <span class="alternate2"><b>sortie des valeurs</b></span>
+						```clj
+						(def add-voxxed
+						  (fn [op1 op2]
+						    (+ op1 op2)))
+						```
+						```clj
+						(defn add-voxxed [op1 op2]
+						    (+ op1 op2))
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						`add-voxxed` : nom de la fonction
+
+						`[op1 op2]` : parametres
+
+						La suite est le corps de la fonction
+						```clj
+						(add-voxxed 23 1977)
+						;; 2000
+						```
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Types disponibles
+
+						```clj
+						12 ;; long
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						23.45 ;; double
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						23.45M ;; big decimal
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						"voxxed france" ;; string
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						true ;; boolean
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						\a ;; character
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						10/3 ;; ratio
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						:clojure ;; keyword
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						#".*" ;; regex pattern
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						nil ;; null value
+						```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Structures de données
+
+						```clj
+						("one" "deux" "tres") ;; list
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						["one" "deux" "tres"] ;; vector
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						#{"one" "deux" "tres"} ;; set
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						{:one "one", :two "deux", :three "tres"} ;; map
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						* Structures immutables
+						* Structures persistentes
+						* Performant même en modification (pas de copie lors des modifs)
+						* Adapté à la programmation fonctionnelle
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Langage orienté données <small>1/2</small>
+						*code is data*
+						```clj
+						;; code or data
+						(+ 10 5)
+
+						(defproject clojure-noobs "0.1.0-SNAPSHOT"
+						   :description "FIXME: write description")
+
+						[:div
+						  [:ul
+						    (for [i list1]
+							  [:li i])]
+						[:ul
+						  (for [i list2]
+						    [:li i])]
+						[:ul
+						  (for [i list3]
+						    [:li i])]]
+						```
+
+						➜ `homoiconicité`<!-- .element: class="fragment"-->
+						</script>
+				</section>
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Langage orienté données <small>2/2</small>
+
+						L'information est représenté sous forme de donnée.
+						Clojure manipule la donnée avec des litéraux :
+						```clj
+						[666 42 "voxxed"] ;; vector
+						(1 2 3 4) ;; list
+						{:first-name "florian" :last-name "boulay"} ;; map
+						```
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Éléments de base <small>- 1/3</small>
+
+						```clj
+						;; concat string
+						(str "voxxed" " " "lux")
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; new lines not required
+						(str "hello" " world") 21 (= false nil)
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; falsy/truthy
+						(if nil
+						  (println true)
+						  (println false))
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; define variable
+						(def toto {:name "florian" :age 35})
+						```
+						<!-- .element: class="fragment current-visible"-->
+						```clj
+						;; show documentation
+						(doc +)
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; show source code
+						(source +)
+						```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Éléments de base <small>- 2/3</small>
+
+						```clj
+						;; if
+						(if (= (.getDayOfMonth (now)) 7)
+						  (println "in voxxed lux")
+						  (println "at home"))
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; cond and random int
+						(def x (- (rand-int 20) 10))
+
+						(cond (> x 0) "positive"
+						  (= x 0) "zero"
+						  (< x 0) "negative")
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; recursive call
+						(defn facto [n]
+						  (loop [cnt n acc 1]
+						    (if (zero? cnt)
+							  acc
+							  (recur (dec cnt) (* acc cnt)))))
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Éléments de base <small>- 3/3</small>
+
+						```clj
+						;; loop with index
+						(dotimes [i 3]
+						  (println (str "==> " i)))
+						;; ==> 0
+						;; ==> 1
+						;; ==> 2
+						;; nil
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; for loop - returns a seq
+						(for [x1 (range 5)
+						      x2 (range 0 6 2)]
+							    (* x1 x2))
+						;; (0 0 0 0 2 4 0 4 8 0 6 12 0 8 16)
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; local binding
+						(let [my-vector [1 2 3 4]
+						      my-map {:first "florian" :last "boulay"}
+							  my-list (list 4 3 2 1)
+							  my-string "florian"]
+							  (println my-vector my-map my-list my-string)))
+						;; [1 2 3 4] {:first florian, :last boulay} (4 3 2 1) florian
+						;; nil
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Utiliser les structures de données
+
+						```clj
+						;; transformer un vecteur en liste
+						(set [1 2 3 2 1 2 3])
+						;; #{1 2 3}
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; ajouter un élément à une map
+						(assoc {:key "fake-value"} :key 234)
+						;; {:key 234}
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; compter le nombre d'éĺements d'une liste
+						(count '(1 2 3 4 5 6 7 0 9 23 88 42))
+						;; 12
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Sequences
+
+						Abstraction d'une liste
+						```clj
+						(first "florian")
+						;; \f
+						(rest "florian")
+						;; (\l \o \r \i \a \n)
+						(cons \f [\l \o \r \i \a \n])
+						;; (\f \l \o \r \i \a \n)
+
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; abstraction sur plusieurs structure de données
+						(let [my-vector [1 2 3 4]
+						      my-map {:first "florian" :last "boulay"}
+							  my-list (list 4 3 2 1)
+							  my-string "florian"]
+						  [(first my-vector) (rest my-vector)
+						   (keys my-map) (vals my-map)
+						   (first my-list) (rest my-list)
+						   (first my-string) (rest my-string)])
+						;; [1 (2 3 4) (:first :last) ("florian" "boulay") 4 (3 2 1) \f (\l \o \r \i \a \n)]
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						➜ Les séquences sont lazy par défaut<!-- .element: class="fragment"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Java interop
+
+						```clj
+						;; static methods (or static field)
+						(Thread/sleep 5)
+						;; nil
+						Math/PI
+						;; 3.141592653589793
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; instance methods
+						(.toUpperCase "florian")
+						;; FLORIAN
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; constructeur
+						(java.util.ArrayList. [1 2 3])
+						;; [1 2 3]
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; field access
+						(.-x (java.awt.Point. 1 2))
+						;; 1
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Concurrence <small>1/4</small>
+
+						3 types d'objets : atom, ref, agent
+
+						|   | Coordonné  | Non Coordonné  |
+						|:-:|:-:|:-:|
+						| Synchrone  | ref  | atom  |
+						| Asynchrone  |   | agent  |
+
+
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Concurrence <small>2/4</small>
+
+						```clj
+						;; atoms : creation et lecture
+						(def currently-connected (atom []))
+
+						@currently-connected
+						;; []
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; atoms : mise à jour
+						(swap! currently-connected conj "florian")
+
+						@currently-connected
+						;; ["florian"]
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; atoms : forcer une valeur
+						(reset! currently-connected [])
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						;; agents
+						(def download-count (agent 0))
+
+						(send download-count inc)
+
+						@download-count
+						;; 1
+		  				```
+						<!-- .element: class="fragment current-visible"-->
+
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Concurrence <small>3/4</small>
+
+						STM (Software Transactionnal Memory) afin de coordonner plusieurs modifications simultanées.
+
+						Les agents et les refs peuvent être utilisés dans un STM.
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Concurrence <small>4/4</small>
+
+						```clj
+						;; ref and STM
+						(def account-a (ref 1000))
+						;; #'user/account-a
+
+						(def account-b (ref 1000))
+						;; #'user/account-b
+
+						(dosync
+						  (alter account-a + 100)
+						  (alter account-b - 100))
+						;; 900
+
+						@account-a
+						;; 1100
+						@account-b
+						;; ⇒ 900
+		  				```
+						</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Macros <small>1/2</small>
+
+						Une macro prend en <span class="alternate1"><b>entrée du code Clojure</b></span> et renvoie en <span class="alternate2"><b>sortie du code Clojure</b></span>
+
+						```clj
+						;; simple macro avec opérateur infix
+						(defmacro infix
+						  [infixed]
+						  (list (second infixed) (first infixed) (last infixed)))
+
+						(infix (1 + 41))
+						;; 42
+		  				```
+						<!-- .element: class="fragment"-->
+
+						```clj
+						;; macro expansion
+						(macroexpand '(infix (1 + 41)))
+						;; (+ 1 41)
+						```
+						<!-- .element: class="fragment"-->
+					</script>
+				</section>
+
+				<section data-markdown data-transition="none">
+					<script type="text/template">
+						## Macros <small>2/2</small>
+
+						Différence macro et fonction
+
+						```clj
+						(defmacro twice [e] `(do ~e ~e))
+
+						(twice (println "voxxed"))
+						;; voxxed
+						;; voxxed
+						;; nil
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+						```clj
+						(defn twice [e] `(do ~e ~e))
+
+						(twice (println "voxxed"))
+						;; voxxed
+						;; (do nil nil)
+						```
+						<!-- .element: class="fragment current-visible"-->
+
+					</script>
+				</section>
+
+
+				<section data-state="intro" data-transition="none">
+					<br><br><br><br>
+					<h1>Live coding </h1>
+				</section>
+				<section data-state="intro" data-transition="none">
+					<br><br><br><br>
+					<h1>Merci !</h1>
+				</section>
+				<img src="luxembourg-white-text.png" style="height:100px;bottom:50px;right:50px;position:absolute"/>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+				center: false,
+				controls: false,
+				progress: true,
+                width: 1280,
+                height: 720,
+                slideNumber: true,
+                margin: 0.0,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
+<!---->

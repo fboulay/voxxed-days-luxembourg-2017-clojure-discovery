@@ -1,0 +1,9 @@
+= Présentation Voxxed Days Luxembourg 2017
+
+== Intro
+
+Ce repository contient la présentation que j'ai donnée à Voxxed Days Luxembourg 2017 intitulée "À la découverte de Clojure".
+
+La présentation est visilbe à l'URL https://fboulay.github.io/voxxed-luxembourg-2017-clojure/
+
+La vidéo est bientôt disponible sur youtube
